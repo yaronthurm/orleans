@@ -37,7 +37,6 @@ namespace Orleans.Runtime.Messaging
         private IncomingMessageAcceptor ima;
         private static readonly TraceLogger log = TraceLogger.GetLogger("Orleans.Messaging.MessageCenter");
         private Action<Message> rerouteHandler;
-        private Action<List<GrainId>> clientDropHandler;
 
         // ReSharper disable UnaccessedField.Local
         private IntValueStatistic sendQueueLengthCounter;
@@ -91,18 +90,6 @@ namespace Orleans.Runtime.Messaging
             Gateway = new Gateway(this, gatewayAddress);
         }
 
-        public void RecordProxiedGrain(GrainId grainId, Guid clientId)
-        {
-            if (Gateway != null)
-                Gateway.RecordProxiedGrain(grainId, clientId);
-        }
-
-        public void RecordUnproxiedGrain(GrainId grainId)
-        {
-            if (Gateway != null)
-                Gateway.RecordUnproxiedGrain(grainId);
-        }
-
         public void Start()
         {
             IsBlockingApplicationMessages = false;
@@ -110,10 +97,10 @@ namespace Orleans.Runtime.Messaging
             OutboundQueue.Start();
         }
 
-        public void StartGateway()
+        public void StartGateway(ClientObserverRegistrar clientRegistrar)
         {
             if (Gateway != null)
-                Gateway.Start();
+                Gateway.Start(clientRegistrar);
         }
 
         public void PrepareToStop()
@@ -209,23 +196,6 @@ namespace Orleans.Runtime.Messaging
                     msg.SendingSilo = MyAddress;
                 OutboundQueue.SendMessage(msg);
             }
-        }
-
-        public Action<List<GrainId>> ClientDropHandler
-        {
-            set
-            {
-                if (clientDropHandler != null)
-                    throw new InvalidOperationException("MessageCenter ClientDropHandler already set");
-                
-                clientDropHandler = value;
-            }
-        }
-
-        internal void RecordClientDrop(List<GrainId> client)
-        {
-            if (clientDropHandler != null && client != null)
-                clientDropHandler(client);
         }
 
         internal void SendRejection(Message msg, Message.RejectionTypes rejectionType, string reason)

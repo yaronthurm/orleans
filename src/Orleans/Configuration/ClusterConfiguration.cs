@@ -145,10 +145,14 @@ namespace Orleans.Runtime.Configuration
 
         private static string WriteXml(XmlElement element)
         {
-            var text = new StringWriter();
-            var xml = new XmlTextWriter(text);
-            element.WriteTo(xml);
-            return text.ToString();
+            using(var text = new StringWriter())
+            {
+                using(var xml = new XmlTextWriter(text))
+                { 
+                    element.WriteTo(xml);
+                    return text.ToString();
+                }
+            }
         }
 
         private void CalculateOverrides()
@@ -199,9 +203,13 @@ namespace Orleans.Runtime.Configuration
             }
         }
 
+        /// <summary>
+        /// This method may be called by the silo host or test host to tweak a provider configuration after it has been already loaded.
+        /// Its is optional and should NOT be automaticaly called by the runtime.
+        /// </summary>
         internal void AdjustConfiguration()
         {
-            GlobalConfiguration.AdjustConfiguration(Globals.ProviderConfigurations, Globals.DeploymentId);
+            ProviderConfigurationUtility.AdjustConfiguration(Globals.ProviderConfigurations, Globals.DeploymentId);
         }
 
         private void InitNodeSettingsFromGlobals(NodeConfiguration n)

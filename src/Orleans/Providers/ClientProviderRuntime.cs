@@ -33,7 +33,7 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers
 {
-    internal class ClientProviderRuntime : IProviderRuntime, IStreamProviderRuntime
+    internal class ClientProviderRuntime : IStreamProviderRuntime
     { 
         private IStreamPubSub pubSub;
         private StreamDirectory streamDirectory;
@@ -190,6 +190,16 @@ namespace Orleans.Providers
         public object GetCurrentSchedulingContext()
         {
             return null;
+        }
+
+        public Task StartPullingAgents(
+            string streamProviderName,
+            StreamQueueBalancerType balancerType,
+            IQueueAdapter queueAdapter,
+            TimeSpan getQueueMsgsTimerPeriod,
+            TimeSpan initQueueTimeout)
+        {
+            return TaskDone.Done;
         }
     }
 }

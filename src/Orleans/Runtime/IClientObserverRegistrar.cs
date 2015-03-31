@@ -35,14 +35,9 @@ namespace Orleans.Runtime
     /// </summary>
     internal interface IClientObserverRegistrar : ISystemTarget
     {
-       /// <summary>
-        /// Registers a client observer object on this gateway.
-        /// </summary>
-        Task<ActivationAddress> RegisterClientObserver(GrainId grainId, Guid clientId);
-
         /// <summary>
-        /// Unregisters client observer object from all gateways.
+        /// Start this system target.
         /// </summary>
-        Task UnregisterClientObserver(GrainId target);
+        Task Start();
     }
 }
